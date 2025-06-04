@@ -1,6 +1,7 @@
 import subprocess
 import shlex
 
+# Commands that should open in a new Konsole window
 INTERACTIVE_COMMANDS = {"nano", "vim", "htop", "top", "less", "man"}
 
 def is_interactive_command(command: str) -> bool:
@@ -9,12 +10,12 @@ def is_interactive_command(command: str) -> bool:
 def execute_command(command: str) -> str:
     try:
         if is_interactive_command(command):
-            # Launch in a new Konsole window and keep it open after command
+            # Use KDE's Konsole
             terminal_cmd = f"konsole --noclose -e bash -c {shlex.quote(command)}"
             subprocess.Popen(terminal_cmd, shell=True)
             return f"🚀 Launched in Konsole: {command}"
 
-        # For non-interactive commands
+        # Run regular command
         result = subprocess.run(
             command,
             shell=True,
