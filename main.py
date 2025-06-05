@@ -7,7 +7,7 @@ from tools import execute_command
 def show_boot_screen():
     os.system("clear")
     print("\033[1;34m")  # Commodore-style blue
-    print(" *** SCCH CHATT V1.0 ***")
+    print(" *** SCCH CHATT Development System***")
     print(" ")
     print("READY.\n")
     print("\033[0m")
