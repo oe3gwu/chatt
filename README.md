@@ -43,6 +43,7 @@ model=YOUR_MODEL
 cd chatt
 python3 main.py
 ```
+
 ## ⚠️ Disclaimer
 
 CHATT is a **prototype** developed for experimental and educational use.  
