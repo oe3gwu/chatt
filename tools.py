@@ -1,10 +1,13 @@
 import subprocess
 import shlex
+import shutil
+import os
 
-# Commands that should run in Konsole
-INTERACTIVE_COMMANDS = {"nano", "vim", "htop", "top", "less", "man", "apt"}
+# Commands that require an interactive terminal
+INTERACTIVE_COMMANDS = {
+    "nano", "vim", "htop", "top", "less", "man", "apt", "fdisk", "cfdisk", "nmtui"
+}
 
-# Substrings that indicate danger (must be lowercase)
 DANGEROUS_KEYWORDS = [
     "rm -rf", "mkfs", ":(){", "shutdown", "reboot", "poweroff", "dd if=",
     "mv /", "chmod -r", "chown -r", "wipefs",
@@ -24,6 +27,45 @@ def confirm_dangerous(command: str) -> bool:
     confirm = input(f"⚠️ REALLY run this? It may be potentially disastrous:\n    {command}\n[Y/n]: ").strip().lower()
     return confirm in {"y", "yes", ""}
 
+def detect_terminal() -> str:
+    for term in [
+        "konsole",         # KDE
+        "gnome-terminal",  # GNOME
+        "xfce4-terminal",  # XFCE
+        "lxterminal",      # LXDE
+        "qterminal",       # LXQt
+        "tilix",           # GNOME alt
+        "xterm",           # fallback
+        "mate-terminal",   # MATE
+        "alacritty",       # Modern GPU term
+        "terminator"       # Advanced
+    ]:
+        if shutil.which(term):
+            return term
+    return None
+
+def launch_in_terminal(command: str) -> str:
+    terminal = detect_terminal()
+    if terminal:
+        quoted_cmd = shlex.quote(command)
+        if "konsole" in terminal:
+            cmd = f"{terminal} -e bash -c {quoted_cmd}"
+        elif "gnome-terminal" in terminal or "xfce4-terminal" in terminal or "mate-terminal" in terminal:
+            cmd = f"{terminal} -- bash -c {quoted_cmd}"
+        elif "lxterminal" in terminal:
+            cmd = f"{terminal} -e bash -c {quoted_cmd}"
+        elif "qterminal" in terminal or "tilix" in terminal or "xterm" in terminal or "terminator" in terminal:
+            cmd = f"{terminal} -e bash -c {quoted_cmd}"
+        elif "alacritty" in terminal:
+            cmd = f"{terminal} -e bash -c {quoted_cmd}"
+        else:
+            return f"⚠️ Terminal '{terminal}' is not supported."
+
+        subprocess.Popen(cmd, shell=True)
+        return f"🚀 Launched in {terminal}: {command}"
+    else:
+        return f"⚠️ No supported terminal emulator found."
+
 def execute_command(command: str) -> str:
     try:
         if is_dangerous_command(command):
@@ -31,10 +73,9 @@ def execute_command(command: str) -> str:
                 return "🛑 Command skipped for safety."
 
         if is_interactive_command(command):
-            terminal_cmd = f"konsole --noclose -e bash -c {shlex.quote(command)}"
-            subprocess.Popen(terminal_cmd, shell=True)
-            return f"🚀 Launched in Konsole: {command}"
+            return launch_in_terminal(command)
 
+        # Run non-interactive commands inline
         result = subprocess.run(
             command,
             shell=True,

@@ -33,7 +33,7 @@ def show_boot_screen():
 # OpenAI-compatible client (works with vLLM)
 client = OpenAI(
     api_key="empty",
-    base_url=""
+    base_url="https://vllm-api.scch.at/v1"
 )
 
 # Tool declaration for function calling
