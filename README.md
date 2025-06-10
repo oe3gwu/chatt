@@ -27,7 +27,7 @@
 ```bash
 pip install openai
 git clone https://github.com/yourname/chatt.git
-cd chatt
+```
 
 ## ⚙️ Configuration
 Create a file named config.txt in the same folder as main.py:
