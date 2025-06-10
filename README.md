@@ -39,7 +39,7 @@ model=YOUR_MODEL
 ```
 
 ## 🖥️ Running
-````bash
+```bash
 cd chatt
 python3 main.py
 ```
