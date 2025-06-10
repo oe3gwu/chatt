@@ -2,7 +2,7 @@ import subprocess
 import shlex
 
 # Commands that should open in a new Konsole window
-INTERACTIVE_COMMANDS = {"nano", "vim", "htop", "top", "less", "man"}
+INTERACTIVE_COMMANDS = {"nano", "vim", "htop", "top", "less", "man", "apt"}
 
 def is_interactive_command(command: str) -> bool:
     return any(command.strip().startswith(cmd) for cmd in INTERACTIVE_COMMANDS)
