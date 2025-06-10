@@ -6,7 +6,28 @@ import atexit
 from openai import OpenAI
 from tools import execute_command
 
-# Setup persistent history
+# ─────────────────────────────────────────────
+# Load config.txt
+# ─────────────────────────────────────────────
+def load_config(file_path="config.txt"):
+    config = {}
+    try:
+        with open(file_path) as f:
+            for line in f:
+                line = line.strip()
+                if "=" in line and not line.startswith("#"):
+                    try:
+                        key, value = line.split("=", 1)
+                        config[key.strip()] = value.strip()
+                    except ValueError:
+                        continue  # skip malformed lines
+    except FileNotFoundError:
+        print(f"⚠ Warning: {file_path} not found.")
+    return config
+
+# ─────────────────────────────────────────────
+# Persistent command history
+# ─────────────────────────────────────────────
 HISTORY_FILE = os.path.expanduser("~/.chatt_history")
 try:
     readline.read_history_file(HISTORY_FILE)
@@ -15,6 +36,9 @@ except FileNotFoundError:
 atexit.register(readline.write_history_file, HISTORY_FILE)
 readline.set_history_length(500)
 
+# ─────────────────────────────────────────────
+# Startup screen
+# ─────────────────────────────────────────────
 def show_boot_screen():
     os.system("clear")
     print("\033[1;34m")
@@ -30,33 +54,9 @@ def show_boot_screen():
     print("READY.\n")
     print("\033[0m")
 
-# OpenAI-compatible client (works with vLLM)
-client = OpenAI(
-    api_key="empty",
-    base_url="empty"
-)
-
-# Tool declaration for function calling
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "execute_command",
-            "description": "Executes a bash command. Interactive ones run in Konsole, dangerous ones ask for confirmation.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "command": {
-                        "type": "string",
-                        "description": "The shell command to run"
-                    }
-                },
-                "required": ["command"]
-            }
-        }
-    }
-]
-
+# ─────────────────────────────────────────────
+# Assistant suggestion parser
+# ─────────────────────────────────────────────
 def handle_suggested_command(message_content: str):
     try:
         match = re.search(r'{\s*"name"\s*:\s*"execute_command"\s*,\s*"parameters"\s*:\s*{[^}]+}}', message_content, re.DOTALL)
@@ -80,9 +80,45 @@ def handle_suggested_command(message_content: str):
     except Exception as e:
         print(f"⚠️ Failed to parse command suggestion: {e}")
 
+# ─────────────────────────────────────────────
+# Main loop
+# ─────────────────────────────────────────────
 def main():
+    config = load_config()
+
+    required_keys = {"api_key", "base_url", "model"}
+    if not required_keys.issubset(config):
+        print("❌ ERROR: config.txt must include api_key, base_url, and model.")
+        return
+
+    client = OpenAI(
+        api_key=config["api_key"],
+        base_url=config["base_url"]
+    )
+    model_name = config["model"]
+
     show_boot_screen()
     print("Type your command. Type 'exit' to quit.\n")
+
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "execute_command",
+                "description": "Executes a bash command. Interactive ones run in terminal, dangerous ones are confirmed.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "The shell command to run"
+                        }
+                    },
+                    "required": ["command"]
+                }
+            }
+        }
+    ]
 
     while True:
         try:
@@ -97,7 +133,7 @@ def main():
 
         try:
             response = client.chat.completions.create(
-                model="RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16",
+                model=model_name,
                 messages=[{"role": "user", "content": user_input}],
                 tools=tools,
                 tool_choice="auto"
@@ -125,5 +161,6 @@ def main():
         except Exception as e:
             print(f"❌ Runtime error: {e}")
 
+# ─────────────────────────────────────────────
 if __name__ == "__main__":
     main()
