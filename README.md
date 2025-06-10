@@ -32,7 +32,7 @@ cd chatt
 ## ⚙️ Configuration
 Create a file named config.txt in the same folder as main.py:
 
-```ini
+```
 api_key=YOUR_API_KEY
 base_url=YOUR_OPENAI_URL
 model=YOUR_MODEL
