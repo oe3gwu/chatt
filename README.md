@@ -21,7 +21,7 @@ It can run both interactive and non-interactive commands intelligently in your t
 
 - Python 3.8+
 - `openai` Python package
-- `konsole` terminal emulator (for KDE)
+- terminal emulator
 - vLLM or OpenAI-compatible API endpoint
 
 ---
