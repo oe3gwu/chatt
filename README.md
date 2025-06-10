@@ -43,3 +43,13 @@ model=YOUR_MODEL
 cd chatt
 python3 main.py
 ```
+## ⚠️ Disclaimer
+
+CHATT is a **prototype** developed for experimental and educational use.  
+It is not intended for production environments without thorough review and sandboxing.
+
+- Commands are interpreted and executed via a language model.
+- While safety checks (like confirmation for dangerous commands) are included, they are not foolproof.
+- Use caution and always review suggested commands before confirming execution.
+
+By using CHATT, you accept all responsibility for any system-level changes it performs.
