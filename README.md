@@ -4,8 +4,6 @@
 
 ![CHATT Banner](https://github.com/user-attachments/assets/88c83970-ce19-4518-8142-2f607121e95a)
 
----
-
 ## 🧠 Features
 
 - 🧵 **Command Handling via LLM** — Uses your own OpenAI-compatible LLM (like vLLM) to interpret natural language.
@@ -17,16 +15,12 @@
 - ⚙️ **Terminal Auto-Detection** — Works with many terminal emulators: `konsole`, `xterm`, `lxterminal`, etc.
 - 📁 **Config File Driven** — Easy-to-change LLM connection settings via `config.txt`.
 
----
-
 ## 🧰 Requirements
 
 - Python 3.8+
 - Linux terminal with a GUI terminal emulator
 - A vLLM or OpenAI-compatible API endpoint
 - Python packages: `openai`
-
----
 
 ## 🚀 Installation
 
@@ -35,7 +29,7 @@ pip install openai
 git clone https://github.com/yourname/chatt.git
 cd chatt
 
-## ⚙️ Configuration**
+## ⚙️ Configuration
 Create a file named config.txt in the same folder as main.py:
 
 ```ini
