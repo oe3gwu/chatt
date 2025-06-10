@@ -3,7 +3,7 @@
 **CHATT** is a retro-themed, LLM-powered shell assistant that emulates a Commodore style terminal and executes natural-language commands using your own OpenAI-compatible API (like vLLM).  
 It can run both interactive and non-interactive commands intelligently in your terminal — launching a new Konsole window if needed.
 
-![image](https://github.com/user-attachments/assets/014c9fa0-052c-44a3-977b-29efbc2dbd20)
+![image](https://github.com/user-attachments/assets/88c83970-ce19-4518-8142-2f607121e95a)
 
 ---
 
