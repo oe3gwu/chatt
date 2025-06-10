@@ -1,0 +1,4 @@
+# OpenAI
+api_key=your-real-openai-key
+base_url=https://api.openai.com/v1
+model=gpt-4
