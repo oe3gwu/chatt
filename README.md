@@ -1,35 +1,51 @@
-# CHATT — Command Handling and Terminal Tool
+# 💾 CHATT — Command Handling and Terminal Tool
 
-**CHATT** is a retro-themed, LLM-powered shell assistant that emulates a Commodore style terminal and executes natural-language commands using your own OpenAI-compatible API (like vLLM).  
-It can run both interactive and non-interactive commands intelligently in your terminal — launching a new Konsole window if needed.
+**CHATT** is a nerdy, retro-themed AI terminal assistant designed to run natural-language shell commands securely, safely, and intelligently — all through a ChatGPT-style interface. It supports interactive tools, intelligent command suggestions, safety confirmations, and a Commodore-style startup experience.
 
-![image](https://github.com/user-attachments/assets/88c83970-ce19-4518-8142-2f607121e95a)
+![CHATT Banner](https://github.com/user-attachments/assets/88c83970-ce19-4518-8142-2f607121e95a)
 
 ---
 
 ## 🧠 Features
 
-- 🕹️ Commodore style text screen
-- 💬 LLM-based command understanding
-- 🔧 Bash command execution (via MCP-style tool calls)
-- 🖥️ Automatically opens `konsole` for interactive commands like `nano`, `top`, `vim`, etc.
-- 🔐 Optional confirmation before executing assistant-suggested commands
+- 🧵 **Command Handling via LLM** — Uses your own OpenAI-compatible LLM (like vLLM) to interpret natural language.
+- 🎮 **Retro Boot Screen** — Commodore-style boot output when starting up.
+- 🖥️ **Interactive Command Support** — Launches commands like `nano`, `top`, `htop`, etc. in a real terminal window (Konsole, GNOME Terminal, etc.).
+- 🔒 **Safety Prompts** — Dangerous commands like `rm -rf`, `mkfs`, `fdisk`, `zfs`, `lvm` require confirmation.
+- 📜 **Command History** — Full up/down history support using arrow keys.
+- 🧾 **Tool Call Suggestions** — Assistant can propose structured command JSONs and ask if you'd like to run them.
+- ⚙️ **Terminal Auto-Detection** — Works with many terminal emulators: `konsole`, `xterm`, `lxterminal`, etc.
+- 📁 **Config File Driven** — Easy-to-change LLM connection settings via `config.txt`.
 
 ---
 
 ## 🧰 Requirements
 
 - Python 3.8+
-- `openai` Python package
-- terminal emulator
-- vLLM or OpenAI-compatible API endpoint
+- Linux terminal with a GUI terminal emulator
+- A vLLM or OpenAI-compatible API endpoint
+- Python packages: `openai`
 
 ---
 
 ## 🚀 Installation
-update your LLM connections in main.py
 
 ```bash
+pip install openai
 git clone https://github.com/yourname/chatt.git
 cd chatt
+
+## ⚙️ Configuration**
+Create a file named config.txt in the same folder as main.py:
+
+```ini
+api_key=YOUR_API_KEY
+base_url=YOUR_OPENAI_URL
+model=YOUR_MODEL
+```
+
+## 🖥️ Running
+````bash
+cd chatt
 python3 main.py
+```
