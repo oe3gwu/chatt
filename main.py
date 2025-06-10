@@ -1,3 +1,5 @@
+# main.py
+
 import os
 import json
 import re
@@ -6,28 +8,21 @@ import atexit
 from openai import OpenAI
 from tools import execute_command
 
-# ─────────────────────────────────────────────
-# Load config.txt
-# ─────────────────────────────────────────────
-def load_config(file_path="config.txt"):
+def load_config():
     config = {}
+    base_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(base_path, "config.txt")
     try:
         with open(file_path) as f:
             for line in f:
                 line = line.strip()
-                if "=" in line and not line.startswith("#"):
-                    try:
-                        key, value = line.split("=", 1)
-                        config[key.strip()] = value.strip()
-                    except ValueError:
-                        continue  # skip malformed lines
+                if line and "=" in line and not line.startswith("#"):
+                    key, value = line.split("=", 1)
+                    config[key.strip()] = value.strip()
     except FileNotFoundError:
         print(f"⚠ Warning: {file_path} not found.")
     return config
 
-# ─────────────────────────────────────────────
-# Persistent command history
-# ─────────────────────────────────────────────
 HISTORY_FILE = os.path.expanduser("~/.chatt_history")
 try:
     readline.read_history_file(HISTORY_FILE)
@@ -36,9 +31,6 @@ except FileNotFoundError:
 atexit.register(readline.write_history_file, HISTORY_FILE)
 readline.set_history_length(500)
 
-# ─────────────────────────────────────────────
-# Startup screen
-# ─────────────────────────────────────────────
 def show_boot_screen():
     os.system("clear")
     print("\033[1;34m")
@@ -54,41 +46,52 @@ def show_boot_screen():
     print("READY.\n")
     print("\033[0m")
 
-# ─────────────────────────────────────────────
-# Assistant suggestion parser
-# ─────────────────────────────────────────────
 def handle_suggested_command(message_content: str):
     try:
-        match = re.search(r'{\s*"name"\s*:\s*"execute_command"\s*,\s*"parameters"\s*:\s*{[^}]+}}', message_content, re.DOTALL)
-        if match:
-            cmd_json = match.group(0)
-            cmd_json_clean = cmd_json.replace("\n", " ").replace("\r", " ").strip()
-            cmd_json_clean = re.sub(r',\s*}', '}', cmd_json_clean)
-            cmd_json_clean = re.sub(r',\s*]', ']', cmd_json_clean)
-            cmd_obj = json.loads(cmd_json_clean)
+        # Show assistant message for transparency
+        print("🧠 Raw suggestion from assistant:")
+        print(message_content)
 
-            if cmd_obj.get("name") == "execute_command":
-                suggested_command = cmd_obj["parameters"]["command"]
-                confirm = input(f"🧠 The assistant suggests: '{suggested_command}'. Run it? [Y/n]: ").strip().lower()
-                if confirm in {"", "y", "yes"}:
-                    result = execute_command(suggested_command)
-                    print(result)
-                else:
-                    print("❎ Skipped.")
+        # Look for something that starts like a JSON dict and contains "command":
+        if "command" not in message_content:
+            print("🟡 No command detected.")
+            return
+
+        # Fix common JSON issues
+        fixed = message_content.strip()
+
+        # Try to repair missing quote after 'execute_command'
+        fixed = re.sub(r'"name":\s*"execute_command([^"]*)"', r'"name": "execute_command"', fixed)
+
+        # Fix unquoted keys or missing braces (best-effort)
+        fixed = re.sub(r"([,{])\s*'([^']+)'\s*:", r'\1 "\2":', fixed)
+        fixed = re.sub(r":\s*'([^']+)'", r': "\1"', fixed)
+
+        # Attempt to parse the fixed JSON
+        cmd_obj = json.loads(fixed)
+
+        if cmd_obj.get("name") == "execute_command":
+            suggested_command = cmd_obj["parameters"]["command"]
+            confirm = input(f"🧠 The assistant suggests: '{suggested_command}'. Run it? [Y/n]: ").strip().lower()
+            if confirm in {"", "y", "yes"}:
+                result = execute_command(suggested_command)
+                print(result)
+            else:
+                print("❎ Skipped.")
         else:
-            print("🟡 No runnable suggestion detected.")
-    except Exception as e:
-        print(f"⚠️ Failed to parse command suggestion: {e}")
+            print("🟡 Not an execute_command suggestion.")
 
-# ─────────────────────────────────────────────
-# Main loop
-# ─────────────────────────────────────────────
+    except json.JSONDecodeError as e:
+        print(f"⚠️ Invalid JSON from assistant. Cannot parse suggestion.\n{e}")
+    except Exception as e:
+        print(f"⚠️ Failed to process suggestion: {e}")
+
+
 def main():
     config = load_config()
 
-    required_keys = {"api_key", "base_url", "model"}
-    if not required_keys.issubset(config):
-        print("❌ ERROR: config.txt must include api_key, base_url, and model.")
+    if not all(k in config and config[k] for k in ("api_key", "base_url", "model")):
+        print("❌ ERROR: config.txt must include non-empty api_key, base_url, and model.")
         return
 
     client = OpenAI(
@@ -161,6 +164,5 @@ def main():
         except Exception as e:
             print(f"❌ Runtime error: {e}")
 
-# ─────────────────────────────────────────────
 if __name__ == "__main__":
     main()
